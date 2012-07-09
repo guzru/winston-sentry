@@ -1,0 +1,22 @@
+{
+  "name": "winston-sentry",
+  "version": "0.0.2",
+  "description": "Sentry transport for the winston logger.",
+  "main": "sentry-transport.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/guzru/winston-sentry.git"
+  },
+  "keywords": [
+    "node",
+    "sentry",
+    "javascript",
+    "logger",
+    "winston"
+  ],
+  "author": "Cristiano Valente",
+  "license": "BSD"
+}
