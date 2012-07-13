@@ -2,6 +2,7 @@ winston-sentry
 ==============
 
 Sentry transport for winston logger for node js
+-----------------------------------------------
 
 Follow this sample configuration to use:
 
@@ -34,8 +35,16 @@ Winston logging levels are mapped to the default sentry levels like this:
     warn: 'warning',
     error: 'error',
     
+New with version 0.0.3!
+-----------------------
+
+ * when logging as `error` level, it will implicitly call raven's `captureError` which will also capture the stack trace.
+ * the `winston.Logger` object exposes the sentry client as `sentry_client`. Usage is simple:
+ 
+    logger = new winston.Logger(...);
+    logger.sentry_client.captureQuery("SELECT * FROM users;");
+    
 ** TODO:
 
- * queries logging
- * capture sentry identifiers
+ * capture sentry identifiers?
     

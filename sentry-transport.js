@@ -31,6 +31,9 @@ var Sentry = winston.transports.CustomerLogger = function (options) {
   this._sentry.on('error', function() {
     console.log("Cannot talk to sentry!");
   });
+  
+  // Expose sentry client to winston.Logger
+  winston.Logger.prototype.sentry_client = this._sentry;
 };
 
 //
@@ -50,9 +53,16 @@ Sentry.prototype.log = function (level, msg, meta, callback) {
   });
   
   try {
-    this._sentry.captureMessage(msg, extra, function(err) {
-      callback(null, true);
-    });
+    if(level == 'error') {
+      // Support exceptions logging
+      this._sentry.captureError(new Error(msg), extra, function(err) {
+        callback(null, true);
+      });
+    } else {
+      this._sentry.captureMessage(msg, extra, function(err) {
+        callback(null, true);
+      });
+    }
   } catch(err) {
     console.log(err);
   }
