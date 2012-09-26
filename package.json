@@ -1,6 +1,6 @@
 {
   "name": "winston-sentry",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Sentry transport for the winston logger.",
   "main": "sentry-transport.js",
   "scripts": {
