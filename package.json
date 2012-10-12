@@ -11,8 +11,8 @@
     "url": "https://github.com/guzru/winston-sentry.git"
   },
   "dependencies": {
-    "raven": "",
-    "underscore": ""
+    "raven": "0.4.x",
+    "underscore": "1.4.2"
   },
   "keywords": [
     "node",
