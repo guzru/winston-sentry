@@ -3,7 +3,7 @@ var util = require('util'),
     winston = require('winston')
     _ = require('underscore');
     
-var Sentry = winston.transports.CustomerLogger = function (options) {
+var Sentry = winston.transports.Sentry = function (options) {
 
   this.name = 'Sentry';
   this._dsn = options.dsn || '';
