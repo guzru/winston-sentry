@@ -2,7 +2,7 @@ var util = require('util'),
     raven = require('raven'),
     winston = require('winston')
     _ = require('underscore');
-    
+
 var Sentry = winston.transports.CustomerLogger = function (options) {
 
   this.name = 'Sentry';
@@ -10,11 +10,11 @@ var Sentry = winston.transports.CustomerLogger = function (options) {
   this._patchGlobal = options.patchGlobal || false;
   this._sentry = new raven.Client(this._dsn);
   this._logger = options.logger || 'root';
-  
+
   if(this.patchGlobal) {
     this._sentry.patchGlobal();
   }
-  
+
   this._levels_map = {
     silly: 'debug',
     verbose: 'debug',
@@ -31,7 +31,7 @@ var Sentry = winston.transports.CustomerLogger = function (options) {
   this._sentry.on('error', function() {
     console.log("Cannot talk to sentry!");
   });
-  
+
   // Expose sentry client to winston.Logger
   winston.Logger.prototype.sentry_client = this._sentry;
 };
@@ -46,16 +46,16 @@ Sentry.prototype.log = function (level, msg, meta, callback) {
   // TODO: handle this better
   level = this._levels_map[level] || this.level;
   meta = meta || {};
-  
+
   extra = _.extend(meta, {
     'level': level,
     'logger': this.logger
   });
-  
+
   try {
     if(level == 'error') {
       // Support exceptions logging
-      this._sentry.captureError(new Error(msg), extra, function(err) {
+      this._sentry.captureError(msg, extra, function(err) {
         callback(null, true);
       });
     } else {
