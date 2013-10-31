@@ -7,9 +7,7 @@ var Sentry = winston.transports.CustomerLogger = function (options) {
 
   this.name = 'Sentry';
   this._dsn = options.dsn || '';
-  this._patchGlobal = options.patchGlobal || false;
-  this._sentry = new raven.Client(this._dsn);
-  this._logger = options.logger || 'root';
+  this._sentry = new raven.Client(this._dsn, {logger: options.logger || 'root'});
 
   if(this.patchGlobal) {
     this._sentry.patchGlobal();
