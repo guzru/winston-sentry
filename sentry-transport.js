@@ -1,7 +1,7 @@
 var util = require('util'),
-    raven = require('raven'),
-    winston = require('winston')
-    _ = require('underscore');
+  raven = require('raven'),
+  winston = require('winston')
+_ = require('underscore');
 
 var Sentry = winston.transports.CustomerLogger = function (options) {
 
@@ -41,23 +41,30 @@ var Sentry = winston.transports.CustomerLogger = function (options) {
 //
 util.inherits(Sentry, winston.Transport);
 
-Sentry.prototype.log = function (level, msg, meta, callback) {
+Sentry.prototype.log = function (level, msg, meta, callback, error) {
   // TODO: handle this better
   level = this._levels_map[level] || this.level;
-  meta = meta || {};
 
-  var extra = _.extend(meta, {
+  meta = {
+    'extra': meta || undefined,
     'level': level
-  });
+  }
 
   try {
     if(level == 'error') {
       // Support exceptions logging
-      this._sentry.captureError(msg, extra, function() {
+      if (error) {
+        if (msg) {
+          error.message = msg + ', cause: ' + error.message
+        }
+        msg = error;
+      }
+
+      this._sentry.captureError(msg, meta, function() {
         callback(null, true);
       });
     } else {
-      this._sentry.captureMessage(msg, extra, function() {
+      this._sentry.captureMessage(msg, meta, function() {
         callback(null, true);
       });
     }
