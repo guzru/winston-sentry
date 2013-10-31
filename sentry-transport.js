@@ -7,6 +7,7 @@ var Sentry = winston.transports.CustomerLogger = function (options) {
 
   this.name = 'Sentry';
   this._dsn = options.dsn || '';
+  this.patchGlobal = options.patchGlobal || false;
   this._sentry = new raven.Client(this._dsn, {logger: options.logger || 'root'});
 
   if(this.patchGlobal) {
@@ -19,15 +20,15 @@ var Sentry = winston.transports.CustomerLogger = function (options) {
     info: 'info',
     debug: 'debug',
     warn: 'warning',
-    error: 'error',
+    error: 'error'
   }
 
   // Set the level from your options
   this.level = options.level || 'info';
 
   // Handle errors
-  this._sentry.on('error', function() {
-    console.log("Cannot talk to sentry!");
+  this._sentry.on('error', function(err) {
+    console.error("Sentry error: " + err);
   });
 
   // Expose sentry client to winston.Logger
@@ -45,24 +46,23 @@ Sentry.prototype.log = function (level, msg, meta, callback) {
   level = this._levels_map[level] || this.level;
   meta = meta || {};
 
-  extra = _.extend(meta, {
-    'level': level,
-    'logger': this.logger
+  var extra = _.extend(meta, {
+    'level': level
   });
 
   try {
     if(level == 'error') {
       // Support exceptions logging
-      this._sentry.captureError(msg, extra, function(err) {
+      this._sentry.captureError(msg, extra, function() {
         callback(null, true);
       });
     } else {
-      this._sentry.captureMessage(msg, extra, function(err) {
+      this._sentry.captureMessage(msg, extra, function() {
         callback(null, true);
       });
     }
   } catch(err) {
-    console.log(err);
+    console.error(err);
   }
 };
 
