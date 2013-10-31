@@ -3,7 +3,7 @@ var util = require('util'),
     winston = require('winston')
     _ = require('underscore');
 
-var Sentry = winston.transports.CustomerLogger = function (options) {
+var Sentry = winston.transports.SentryLogger = function (options) {
 
   this.name = 'Sentry';
   this._dsn = options.dsn || '';
@@ -21,7 +21,7 @@ var Sentry = winston.transports.CustomerLogger = function (options) {
     info: 'info',
     debug: 'debug',
     warn: 'warning',
-    error: 'error',
+    error: 'error'
   }
 
   // Set the level from your options
@@ -47,10 +47,11 @@ Sentry.prototype.log = function (level, msg, meta, callback) {
   level = this._levels_map[level] || this.level;
   meta = meta || {};
 
-  extra = _.extend(meta, {
+  extra = {
     'level': level,
-    'logger': this.logger
-  });
+    'logger': this.logger,
+    'extra': meta
+  };
 
   try {
     if(level == 'error') {
