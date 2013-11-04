@@ -39,17 +39,59 @@ Winston logging levels are mapped to the default sentry levels like this:
     warn: 'warning',
     error: 'error',
     
-New with version 0.0.3!
------------------------
+Changelog
+---------
 
- * when logging as `error` level, it will implicitly call raven's `captureError` which will also capture the stack trace.
- * the `winston.Logger` object exposes the sentry client as `sentry_client`. Usage is simple:
+**0.0.5**
+
+ * Winston metadata will be populated into the "Additional Data" section in Sentry.
+ * If metadata contains a `tags` property, any key/value pairs within that property will be populated as Sentry tags.
+   *it will be removed from the "Additional Data" section to avoid data duplication.* This will allow Winston metadata
+   to be filterable within the Sentry UI.
+
+```javascript
+
+logger = new winston.Logger(...);
+logger.log("info", "my log message", {
+      userInformation: {
+         os: "linux",
+         browser: "chrome",
+         userAgent: "<user agent string>"
+      }
+      tags: {
+         productVersion: "1.2"
+      }
+   }
+});
+
+// In Sentry, the "Additional Data" section would show:
+// - userInformation
+//      - os: linux
+//      - browser: chrome
+//      - userAgent: <user agent string>
+//
+// The tags would show:
+// - level: info
+// - logger: [logger property from transport constructor - defaults to "root"]
+// - server_name: [machine name]
+// - productVersion: 1.2
+```
+
+**0.0.4**
+
+ * Added support for capturing "Additional Data".
+
+**0.0.3**
 
 ```javascript
 logger = new winston.Logger(...);
 logger.sentry_client.captureQuery("SELECT * FROM users;");
 ```
-    
+
+ * when logging as `error` level, it will implicitly call raven's `captureError` which will also capture the stack trace.
+ * the `winston.Logger` object exposes the sentry client as `sentry_client`. Usage is simple:
+
+
 ** TODO:
 
  * capture sentry identifiers?
