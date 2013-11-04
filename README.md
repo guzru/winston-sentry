@@ -46,7 +46,7 @@ Changelog
 
  * Winston metadata will be populated into the "Additional Data" section in Sentry.
  * If metadata contains a `tags` property, any key/value pairs within that property will be populated as Sentry tags.
-   *it will be removed from the "Additional Data" section to avoid data duplication.* This will allow Winston metadata
+   *It will be removed from the "Additional Data" section to avoid data duplication.* This will allow Winston metadata
    to be filterable within the Sentry UI.
 
 ```javascript
