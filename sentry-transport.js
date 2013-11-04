@@ -47,10 +47,15 @@ Sentry.prototype.log = function (level, msg, meta, callback) {
   level = this._levels_map[level] || this.level;
   meta = meta || {};
 
+  var extraData = _.extend({}, meta),
+      tags = extraData.tags || null;
+  delete extraData.tags;
+
   extra = {
     'level': level,
     'logger': this.logger,
-    'extra': meta
+    'extra': extraData,
+    'tags': tags
   };
 
   try {
