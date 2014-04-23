@@ -11,8 +11,8 @@
     "url": "https://github.com/guzru/winston-sentry.git"
   },
   "dependencies": {
-    "raven": "~0.5.4",
-    "underscore": "1.4.2"
+    "raven": "0.6.3",
+    "lodash": "2.4.1"
   },
   "peerDependencies": {
     "winston": ">= 0.7.0"
