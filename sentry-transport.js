@@ -41,7 +41,7 @@ var Sentry = winston.transports.SentryLogger = function (options) {
 //
 util.inherits(Sentry, winston.Transport);
 
-Sentry.prototype.log = function (level, msg, meta, callback, error) {
+Sentry.prototype.log = function (level, msg, meta, callback) {
   // TODO: handle this better
   level = this._levels_map[level] || this.level;
   meta = meta || {};
@@ -59,17 +59,17 @@ Sentry.prototype.log = function (level, msg, meta, callback, error) {
   try {
     if(level == 'error') {
       // Support exceptions logging
-      this._sentry.captureError(msg, extra, function() {
-        if (error) {
-          if (msg) {
-            error.message = msg + ', cause: ' + error.message
-          }
-          msg = error;
+      if (meta instanceof Error) {
+        if (msg == '') {
+          msg = meta;
+        } else {
+          meta.message = msg + ". cause: " + meta.message;
+          msg = meta;
         }
-
-        this._sentry.captureError(msg, meta, function() {
-          callback(null, true);
-        })
+      }
+      
+      this._sentry.captureError(msg, extra, function() {
+        callback(null, true);
       });
     } else {
       this._sentry.captureMessage(msg, extra, function() {
