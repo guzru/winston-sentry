@@ -1,15 +1,14 @@
 var util = require('util'),
     raven = require('raven'),
-    winston = require('winston')
+    winston = require('winston'),
     _ = require('underscore');
 
 var Sentry = winston.transports.SentryLogger = function (options) {
 
   this.name = 'Sentry';
   this._dsn = options.dsn || '';
-  this._patchGlobal = options.patchGlobal || false;
-  this._sentry = new raven.Client(this._dsn);
-  this._logger = options.logger || 'root';
+  this.patchGlobal = options.patchGlobal || false;
+  this._sentry = new raven.Client(this._dsn, {logger: options.logger || 'root'});
 
   if(this.patchGlobal) {
     this._sentry.patchGlobal();
@@ -51,9 +50,8 @@ Sentry.prototype.log = function (level, msg, meta, callback) {
       tags = extraData.tags || null;
   delete extraData.tags;
 
-  extra = {
+  var extra = {
     'level': level,
-    'logger': this.logger,
     'extra': extraData,
     'tags': tags
   };
@@ -61,16 +59,25 @@ Sentry.prototype.log = function (level, msg, meta, callback) {
   try {
     if(level == 'error') {
       // Support exceptions logging
-      this._sentry.captureError(msg, extra, function(err) {
+      if (meta instanceof Error) {
+        if (msg == '') {
+          msg = meta;
+        } else {
+          meta.message = msg + ". cause: " + meta.message;
+          msg = meta;
+        }
+      }
+      
+      this._sentry.captureError(msg, extra, function() {
         callback(null, true);
       });
     } else {
-      this._sentry.captureMessage(msg, extra, function(err) {
+      this._sentry.captureMessage(msg, extra, function() {
         callback(null, true);
       });
     }
   } catch(err) {
-    console.log(err);
+    console.error(err);
   }
 };
 
