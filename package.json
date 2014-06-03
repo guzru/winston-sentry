@@ -25,5 +25,11 @@
     "winston"
   ],
   "author": "Cristiano Valente",
+  "contributors": [
+    {
+      "name" : "Shahar Kedar",
+      "url" : "https://github.com/shaharke/"
+    }
+  ],
   "license": "BSD"
 }
