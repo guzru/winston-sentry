@@ -42,6 +42,12 @@ Winston logging levels are mapped to the default sentry levels like this:
 Changelog
 ---------
 
+**0.0.6**
+
+* Error stack traces will be sent to sentry. See [#3](https://github.com/guzru/winston-sentry/issues/3) for more details.
+* Upgrade raven to latest version (0.6.3)
+* Raven client can be passed to the transport from the outside
+
 **0.0.5**
 
  * Winston metadata will be populated into the "Additional Data" section in Sentry.
