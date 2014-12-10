@@ -56,6 +56,16 @@ Sentry.prototype.log = function (level, msg, meta, callback) {
     'tags': tags
   };
 
+  if (extraData.request) {
+    extra.request = extraData.request;
+    delete extraData.request;
+  }
+
+  if (extraData.user) {
+    extra.user = extraData.user;
+    delete extraData.user;
+  }
+
   try {
     if(level == 'error') {
       // Support exceptions logging
