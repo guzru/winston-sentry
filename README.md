@@ -1,7 +1,7 @@
 winston-sentry
 ==============
 
-**NOTE: This project is not actively mantained. Anyone willing to take over, please let me know.**
+**NOTE: This project is not actively maintained. Anyone willing to take over, please let me know.**
 
 Sentry transport for winston logger for node js
 -----------------------------------------------
