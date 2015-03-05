@@ -5,7 +5,6 @@ var util = require('util'),
 
 var Sentry = winston.transports.Sentry = function (options) {
 
-  this.name = 'Sentry';
   this._dsn = options.dsn || '';
   this.patchGlobal = options.patchGlobal || false;
   this._sentry = options.raven || new raven.Client(this._dsn, {logger: options.logger || 'root'});
@@ -40,6 +39,11 @@ var Sentry = winston.transports.Sentry = function (options) {
 // of the base functionality and `.handleExceptions()`.
 //
 util.inherits(Sentry, winston.Transport);
+
+//
+// Expose the name of this Transport on the prototype
+Sentry.prototype.name = 'sentry';
+//
 
 Sentry.prototype.log = function (level, msg, meta, callback) {
   // TODO: handle this better
@@ -77,7 +81,7 @@ Sentry.prototype.log = function (level, msg, meta, callback) {
           msg = meta;
         }
       }
-      
+
       this._sentry.captureError(msg, extra, function() {
         callback(null, true);
       });
