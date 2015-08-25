@@ -44,6 +44,9 @@ Winston logging levels are mapped to the default sentry levels like this:
 Changelog
 ---------
 
+**0.1.0**
+* Upgrade Raven client to version 0.8.1
+
 **0.0.6**
 
 * Error stack traces will be sent to sentry. See [#3](https://github.com/guzru/winston-sentry/issues/3) for more details.
