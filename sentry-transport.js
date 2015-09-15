@@ -6,7 +6,7 @@ var util = require('util'),
 var Sentry = winston.transports.Sentry = function (options) {
 
   this._dsn = options.dsn || '';
-  this._globalTags = options.tags || {};
+  this._globalTags = options.globalTags || {};
   this.patchGlobal = options.patchGlobal || false;
   this._sentry = options.raven || new raven.Client(this._dsn, {logger: options.logger || 'root'});
 
