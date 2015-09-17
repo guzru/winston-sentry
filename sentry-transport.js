@@ -6,6 +6,7 @@ var util = require('util'),
 var Sentry = winston.transports.Sentry = function (options) {
 
   this._dsn = options.dsn || '';
+  this._globalTags = options.globalTags || {};
   this.patchGlobal = options.patchGlobal || false;
   this._sentry = options.raven || new raven.Client(this._dsn, {logger: options.logger || 'root'});
 
@@ -51,7 +52,7 @@ Sentry.prototype.log = function (level, msg, meta, callback) {
   meta = meta || {};
 
   var extraData = _.extend({}, meta),
-      tags = extraData.tags || null;
+      tags = _.extend({}, this._globalTags, extraData.tags);
   delete extraData.tags;
 
   var extra = {
