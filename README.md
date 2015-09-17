@@ -49,6 +49,7 @@ Changelog
 new Sentry({
     globalTags: { foo: "bar" }
 })
+```
 
 **0.1.0**
 * Upgrade Raven client to version 0.8.1
