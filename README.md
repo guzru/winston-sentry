@@ -44,6 +44,14 @@ Winston logging levels are mapped to the default sentry levels like this:
 Changelog
 ---------
 
+**0.1.1**
+* Added support for global tags that will be added to every message sent to sentry
+
+```javascript
+new Sentry({
+    globalTags: { foo: "bar" }
+})
+
 **0.1.0**
 * Upgrade Raven client to version 0.8.1
 
