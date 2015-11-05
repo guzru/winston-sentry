@@ -61,6 +61,11 @@ Sentry.prototype.log = function (level, msg, meta, callback) {
     'tags': tags
   };
 
+  if (extraData.culprit) {
+    extra.culprit = extraData.culprit;
+    delete extraData.culprit;
+  }
+
   if (extraData.request) {
     extra.request = extraData.request;
     delete extraData.request;
