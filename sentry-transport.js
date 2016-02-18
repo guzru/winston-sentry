@@ -8,7 +8,16 @@ var Sentry = winston.transports.Sentry = function (options) {
   this._dsn = options.dsn || '';
   this._globalTags = options.globalTags || {};
   this.patchGlobal = options.patchGlobal || false;
-  this._sentry = options.raven || new raven.Client(this._dsn, {logger: options.logger || 'root'});
+  this.level = options.level || 'info';
+  
+  delete options.dsn;
+  delete options.globalTags;
+  delete options.patchGlobal;
+  delete options.level;
+  
+  options.logger = options.logger || 'root';
+  
+  this._sentry = options.raven || new raven.Client(this._dsn, options);
 
   if(this.patchGlobal) {
     this._sentry.patchGlobal();
@@ -22,9 +31,6 @@ var Sentry = winston.transports.Sentry = function (options) {
     warn: 'warning',
     error: 'error'
   }
-
-  // Set the level from your options
-  this.level = options.level || 'info';
 
   // Handle errors
   this._sentry.on('error', function() {
