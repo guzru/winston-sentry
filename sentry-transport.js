@@ -5,31 +5,30 @@ var util = require('util'),
 
 var Sentry = winston.transports.Sentry = function (options) {
 
-  this._dsn = options.dsn || '';
-  this._globalTags = options.globalTags || {};
-  this.patchGlobal = options.patchGlobal || false;
-  this.level = options.level || 'info';
-  
-  delete options.dsn;
-  delete options.globalTags;
-  delete options.patchGlobal;
-  delete options.level;
-  
-  options.logger = options.logger || 'root';
-  
-  this._sentry = options.raven || new raven.Client(this._dsn, options);
-
-  if(this.patchGlobal) {
-    this._sentry.patchGlobal();
+  // Default options
+  this.defaults = {
+    dsn: '',
+    patchGlobal: false,
+    logger: 'root',
+    level: 'info',
+    levelsMap: {
+      silly: 'debug',
+      verbose: 'debug',
+      info: 'info',
+      debug: 'debug',
+      warn: 'warning',
+      error: 'error'
+    },
+    tags: {},
+    extra: {}
   }
 
-  this._levels_map = {
-    silly: 'debug',
-    verbose: 'debug',
-    info: 'info',
-    debug: 'debug',
-    warn: 'warning',
-    error: 'error'
+  this.options = _.defaultsDeep(options, this.defaults);
+
+  this._sentry = this.options.raven || new raven.Client(this.options.dsn, this.options);
+
+  if(this.options.patchGlobal) {
+    this._sentry.patchGlobal();
   }
 
   // Handle errors
@@ -57,12 +56,11 @@ Sentry.prototype.name = 'sentry';
 //
 
 Sentry.prototype.log = function (level, msg, meta, callback) {
-  // TODO: handle this better
-  level = this._levels_map[level] || this.level;
+  level = this.options.levelsMap[level] || this.options.level;
   meta = meta || {};
 
   var extraData = _.extend({}, meta),
-      tags = _.extend({}, this._globalTags, extraData.tags);
+      tags = extraData.tags;
   delete extraData.tags;
 
   var extra = {
@@ -93,7 +91,7 @@ Sentry.prototype.log = function (level, msg, meta, callback) {
         }
       }
 
-      this._sentry.captureError(msg, extra, function() {
+      this._sentry.captureException(msg, extra, function() {
         callback(null, true);
       });
     } else {
