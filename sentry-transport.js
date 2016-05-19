@@ -1,7 +1,7 @@
 var util = require('util'),
     raven = require('raven'),
     winston = require('winston'),
-    _ = require('underscore');
+    _ = require('lodash');
 
 var Sentry = winston.transports.Sentry = function (options) {
 
