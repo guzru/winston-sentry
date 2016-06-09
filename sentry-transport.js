@@ -23,7 +23,7 @@ var Sentry = winston.transports.Sentry = function (options) {
     this._sentry.patchGlobal();
   }
 
-  this._levels_map = {
+  this._levels_map = options.levels_map || {
     silly: 'debug',
     verbose: 'debug',
     info: 'info',
