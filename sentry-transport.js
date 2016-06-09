@@ -27,8 +27,12 @@ var Sentry = winston.transports.Sentry = function (options) {
   this.level = options.level || 'info';
 
   // Handle errors
-  this._sentry.on('error', function() {
-    console.log("Cannot talk to sentry!");
+  this._sentry.on('error', function(error) {
+    var message = "Cannot talk to sentry.";
+    if(error && error.reason) {
+        message += " Reason: " + error.reason;
+    }
+    console.log(message);
   });
 
   // Expose sentry client to winston.Logger
