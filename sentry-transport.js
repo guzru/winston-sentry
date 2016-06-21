@@ -23,6 +23,9 @@ var Sentry = winston.transports.Sentry = function (options) {
     extra: {}
   }
 
+  // For backward compatibility with deprecated `globalTags` option
+  options.tags = options.tags || options.globalTags;
+
   this.options = _.defaultsDeep(options, this.defaults);
 
   this._sentry = this.options.raven || new raven.Client(this.options.dsn, this.options);
