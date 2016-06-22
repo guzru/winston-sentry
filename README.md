@@ -60,6 +60,7 @@ Changelog
 
 **0.1.1**
 * Added support for global tags that will be added to every message sent to sentry
+* Upgrade Raven client to version 0.11.0
 
 **0.1.0**
 * Upgrade Raven client to version 0.8.1
