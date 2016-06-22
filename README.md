@@ -15,8 +15,10 @@ var logger = new winston.Logger({
     transports: [
         new winston.transports.Console({level: 'silly'}),
         new Sentry({
-                level: 'warn',
-                dsn: "{{ YOUR SENTRY DSN }}"
+            level: 'warn',
+            dsn: "{{ YOUR SENTRY DSN }}",
+            tags: { key: 'value' },
+            extra: { key: 'value' }
         })
     ],
 });
@@ -29,27 +31,35 @@ new Sentry({
     patchGlobal: true
 });
 ```
-    
+
 Winston logging levels are mapped to the default sentry levels like this:
 
+```javascript
+{
     silly: 'debug',
     verbose: 'debug',
     info: 'info',
     debug: 'debug',
     warn: 'warning',
-    error: 'error',
-    
+    error: 'error'
+}
+```
+
+You can customize how log levels are mapped using the `levelsMap` option:
+
+```javascript
+new Sentry({
+    levelsMap: {
+        verbose: 'info'
+    }
+});
+```
+
 Changelog
 ---------
 
 **0.1.1**
 * Added support for global tags that will be added to every message sent to sentry
-
-```javascript
-new Sentry({
-    globalTags: { foo: "bar" }
-})
-```
 
 **0.1.0**
 * Upgrade Raven client to version 0.8.1

@@ -11,8 +11,8 @@
     "url": "https://github.com/guzru/winston-sentry.git"
   },
   "dependencies": {
-    "raven": "^0.8.1",
-    "underscore": "1.8.3"
+    "lodash": "^4.12.0",
+    "raven": "^0.11.0"
   },
   "peerDependencies": {
     "winston": ">= 0.7.0"
@@ -27,8 +27,8 @@
   "author": "Cristiano Valente",
   "contributors": [
     {
-      "name" : "Shahar Kedar",
-      "url" : "https://github.com/shaharke/"
+      "name": "Shahar Kedar",
+      "url": "https://github.com/shaharke/"
     }
   ],
   "license": "BSD"
