@@ -4,13 +4,13 @@ var util = require('util'),
     _ = require('lodash');
 
 var Sentry = winston.transports.Sentry = function (options) {
+  winston.Transport.call(this, _.pick(options, "level"));
 
   // Default options
   this.defaults = {
     dsn: '',
     patchGlobal: false,
     logger: 'root',
-    level: 'info',
     levelsMap: {
       silly: 'debug',
       verbose: 'debug',
