@@ -59,7 +59,7 @@ Sentry.prototype.name = 'sentry';
 //
 
 Sentry.prototype.log = function (level, msg, meta, callback) {
-  level = this.options.levelsMap[level] || this.options.level;
+  level = this.options.levelsMap[level];
   meta = meta || {};
 
   var extraData = _.extend({}, meta),
