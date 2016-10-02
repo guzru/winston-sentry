@@ -1,6 +1,6 @@
 {
   "name": "winston-sentry",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Sentry transport for the winston logger.",
   "main": "sentry-transport.js",
   "scripts": {
@@ -31,5 +31,5 @@
       "url": "https://github.com/shaharke/"
     }
   ],
-  "license": "BSD"
+  "license": "MIT"
 }
