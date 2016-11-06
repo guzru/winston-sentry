@@ -4,7 +4,7 @@ var util = require('util'),
     _ = require('lodash');
 
 var Sentry = winston.transports.Sentry = function (options) {
-  winston.Transport.call(this, _.pick(options, "level"));
+  winston.Transport.call(this, _.pick(options, ["level", "silent"]));
 
   // Default options
   this.defaults = {
@@ -59,6 +59,10 @@ Sentry.prototype.name = 'sentry';
 //
 
 Sentry.prototype.log = function (level, msg, meta, callback) {
+  if (this.silent) {
+    return callback(null, true);
+  }
+
   level = this.options.levelsMap[level];
   meta = meta || {};
 
