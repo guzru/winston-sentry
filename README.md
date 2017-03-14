@@ -58,6 +58,9 @@ new Sentry({
 Changelog
 ---------
 
+**0.2.0**
+* Upgrade Raven client to version 1.1.x
+
 **0.1.2**
 * Upgrade Raven client to version 0.11.0
 * Refactoring global tags support to better work with the new client
