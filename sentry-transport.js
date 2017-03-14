@@ -1,5 +1,5 @@
 var util = require('util'),
-    raven = require('raven'),
+    Raven = require('raven'),
     winston = require('winston'),
     _ = require('lodash');
 
@@ -28,23 +28,20 @@ var Sentry = winston.transports.Sentry = function (options) {
 
   this.options = _.defaultsDeep(options, this.defaults);
 
-  this._sentry = this.options.raven || new raven.Client(this.options.dsn, this.options);
+  Raven.config(this.options.dsn, this.options);
 
-  if(this.options.patchGlobal) {
-    this._sentry.patchGlobal();
+  if (this.options.patchGlobal) {
+    Raven.install();
   }
 
   // Handle errors
-  this._sentry.on('error', function(error) {
+  Raven.on('error', function(error) {
     var message = "Cannot talk to sentry.";
-    if(error && error.reason) {
+    if (error && error.reason) {
         message += " Reason: " + error.reason;
     }
     console.log(message);
   });
-
-  // Expose sentry client to winston.Logger
-  winston.Logger.prototype.sentry_client = this._sentry;
 };
 
 //
@@ -83,7 +80,7 @@ Sentry.prototype.log = function (level, msg, meta, callback) {
   }
 
   try {
-    if(level == 'error') {
+    if (level == 'error') {
       // Support exceptions logging
       if (meta instanceof Error) {
         if (msg == '') {
@@ -94,11 +91,11 @@ Sentry.prototype.log = function (level, msg, meta, callback) {
         }
       }
 
-      this._sentry.captureException(msg, extra, function() {
+      Raven.captureException(msg, extra, function() {
         callback(null, true);
       });
     } else {
-      this._sentry.captureMessage(msg, extra, function() {
+      Raven.captureMessage(msg, extra, function() {
         callback(null, true);
       });
     }
