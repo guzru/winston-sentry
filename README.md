@@ -58,8 +58,20 @@ new Sentry({
 Changelog
 ---------
 
+**0.2.1**
+* Changelog updated. No code changes.
+
 **0.2.0**
 * Upgrade Raven client to version 1.1.x
+
+**0.1.5**
+* Added license file. No code changes.
+
+**0.1.4**
+* Bug fix: Level in log function should not fallback to the level filtering configuration
+
+**0.1.3**
+* Fixes #30: Transport should not ignore configured log level
 
 **0.1.2**
 * Upgrade Raven client to version 0.11.0
