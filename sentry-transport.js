@@ -1,7 +1,9 @@
 var util = require('util'),
-    Raven = require('raven'),
-    winston = require('winston'),
-    _ = require('lodash');
+  winston = require('winston'),
+  _ = require('lodash');
+
+import * as Raven from '@sentry/minimal';
+
 
 var Sentry = winston.transports.Sentry = function (options) {
   winston.Transport.call(this, _.pick(options, "level"));
@@ -9,7 +11,6 @@ var Sentry = winston.transports.Sentry = function (options) {
   // Default options
   this.defaults = {
     dsn: '',
-    patchGlobal: false,
     logger: 'root',
     levelsMap: {
       silly: 'debug',
@@ -19,6 +20,7 @@ var Sentry = winston.transports.Sentry = function (options) {
       warn: 'warning',
       error: 'error'
     },
+    environment: process.env.NODE_ENV,
     tags: {},
     extra: {}
   }
@@ -28,17 +30,13 @@ var Sentry = winston.transports.Sentry = function (options) {
 
   this.options = _.defaultsDeep(options, this.defaults);
 
-  Raven.config(this.options.dsn, this.options);
-
-  if (this.options.patchGlobal) {
-    Raven.install();
-  }
+  Raven.init(this.options);
 
   // Handle errors
-  Raven.on('error', function(error) {
+  Raven.on('error', function (error) {
     var message = "Cannot talk to sentry.";
     if (error && error.reason) {
-        message += " Reason: " + error.reason;
+      message += " Reason: " + error.reason;
     }
     console.log(message);
   });
@@ -60,7 +58,7 @@ Sentry.prototype.log = function (level, msg, meta, callback) {
   meta = meta || {};
 
   var extraData = _.extend({}, meta),
-      tags = extraData.tags;
+    tags = extraData.tags;
   delete extraData.tags;
 
   var extra = {
@@ -91,15 +89,15 @@ Sentry.prototype.log = function (level, msg, meta, callback) {
         }
       }
 
-      Raven.captureException(msg, extra, function() {
+      Raven.captureException(msg, extra, function () {
         callback(null, true);
       });
     } else {
-      Raven.captureMessage(msg, extra, function() {
+      Raven.captureMessage(msg, extra, function () {
         callback(null, true);
       });
     }
-  } catch(err) {
+  } catch (err) {
     console.error(err);
   }
 };
