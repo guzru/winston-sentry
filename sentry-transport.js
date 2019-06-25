@@ -2,7 +2,7 @@ var util = require('util'),
   winston = require('winston'),
   _ = require('lodash');
 
-  const Raven = require('@sentry/node');
+const Raven = require('@sentry/node');
 
 var Sentry = winston.transports.Sentry = function (options) {
   winston.Transport.call(this, _.pick(options, "level"));
@@ -31,14 +31,6 @@ var Sentry = winston.transports.Sentry = function (options) {
 
   Raven.init(this.options);
 
-  // Handle errors
-  Raven.on('error', function (error) {
-    var message = "Cannot talk to sentry.";
-    if (error && error.reason) {
-      message += " Reason: " + error.reason;
-    }
-    console.log(message);
-  });
 };
 
 //
@@ -56,11 +48,11 @@ Sentry.prototype.log = function (level, msg, meta, callback) {
   level = this.options.levelsMap[level];
   meta = meta || {};
 
-  var extraData = _.extend({}, meta),
+  let extraData = _.extend({}, meta),
     tags = extraData.tags;
   delete extraData.tags;
 
-  var extra = {
+  let extra = {
     'level': level,
     'extra': extraData,
     'tags': tags
