@@ -2,8 +2,7 @@ var util = require('util'),
   winston = require('winston'),
   _ = require('lodash');
 
-import * as Raven from '@sentry/minimal';
-
+  const Raven = require('@sentry/node');
 
 var Sentry = winston.transports.Sentry = function (options) {
   winston.Transport.call(this, _.pick(options, "level"));
