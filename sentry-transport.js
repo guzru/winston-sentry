@@ -1,10 +1,18 @@
-var util = require('util'),
+let util = require('util'),
   winston = require('winston'),
   _ = require('lodash');
 
 const Raven = require('@sentry/node');
 
-var Sentry = winston.transports.Sentry = function (options) {
+let onError = function (error) {
+  var message = "Cannot talk to sentry.";
+  if (error && error.reason) {
+    message += " Reason: " + error.reason;
+  }
+  console.log(message);
+}
+
+let Sentry = winston.transports.Sentry = function (options) {
   winston.Transport.call(this, _.pick(options, "level"));
 
   // Default options
@@ -44,8 +52,10 @@ util.inherits(Sentry, winston.Transport);
 Sentry.prototype.name = 'sentry';
 //
 
-Sentry.prototype.log = function (level, msg, meta, callback) {
-  level = this.options.levelsMap[level];
+
+Sentry.prototype.log = function (oldLevel, msg, meta, callback) {
+  const level = this.options.levelsMap[oldLevel];
+
   meta = meta || {};
 
   let extraData = _.extend({}, meta),
@@ -80,14 +90,92 @@ Sentry.prototype.log = function (level, msg, meta, callback) {
         }
       }
 
-      Raven.captureException(msg, extra, function () {
-        callback(null, true);
+      Raven.configureScope(scope => {
+        if (extra.extra) {
+          for (let prop in extra.extra) {
+            scope.setExtra(prop, extra.extra[prop]);
+          }
+          delete extra.extra
+        }
+
+        if (extra.tags) {
+          const tagKeys = extra.tags.keys()
+          tagKeys.forEach((k) => {
+            scope.setTag(k, extra.tags[k]);
+          })
+          delete extra.tags
+
+        }
+
+        if (extra.user) {
+          scope.setUser(extra.user);
+          delete extra.user
+        }
+
+        if (extra.level) {
+          scope.setLevel(extra.level);
+        }
+
+        if (extra.request) {
+          const httpRequest = extra.request
+          const method = httpRequest.method
+          const path = httpRequest.path
+          scope.setFingerprint([method, path]);
+        }
+
+        Raven.captureException(new Error(msg), function (err, res) {
+          if (err) {
+            onError(err)
+          }
+          callback(null, true);
+        });
+        scope.clear();
+
       });
+
+
     } else {
-      Raven.captureMessage(msg, extra, function () {
-        callback(null, true);
+
+      Raven.configureScope(scope => {
+        if (extra.extra) {
+          for (let prop in extra.extra) {
+            scope.setExtra(prop, extra.extra[prop]);
+          }
+          delete extra.extra
+        }
+
+        if (extra.tags) {
+          const tagKeys = extra.tags.keys()
+          tagKeys.forEach((k) => {
+            scope.setTag(k, extra.tags[k]);
+          })
+          delete extra.tags
+
+        }
+
+        if (extra.user) {
+          scope.setUser(extra.user);
+          delete extra.user
+        }
+
+        if (extra.level) {
+          scope.setLevel(extra.level);
+
+        }
+
+        Raven.captureMessage(msg, function (err, res) {
+          if (err) {
+            onError(err)
+          }
+
+          callback(null, true);
+        });
+        scope.clear();
+
       });
     }
+
+
   } catch (err) {
     console.error(err);
   }

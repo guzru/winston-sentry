@@ -4,7 +4,7 @@
   "description": "Sentry transport for the winston logger.",
   "main": "sentry-transport.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -31,5 +31,9 @@
       "url": "https://github.com/shaharke/"
     }
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "mocha": "^6.1.4",
+    "winston": "^3.0.0"
+  }
 }
