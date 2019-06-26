@@ -37,23 +37,29 @@ let Sentry = winston.transports.Sentry = function (options) {
   // For backward compatibility with deprecated `globalTags` option
   options.tags = options.tags || options.globalTags;
 
-  options.user = options.user || options.extra.user
+  if (options.extra) {
+    options.user = options.user || options.extra.user
+    if (options.extra.user) {
+      delete options.extra.user
+    }
 
-  if (options.extra.user) {
-    delete options.extra.user
+    options.context = options.context || options.extra.context
+
+    if (options.extra.context) {
+      delete options.extra.context
+    }
+
   }
 
-  options.context = options.context || options.extra.context
 
-  if (options.extra.context) {
-    delete options.extra.context
-  }
+
+
 
 
   this.options = _.defaultsDeep(options, this.defaults);
 
 
-
+  console.log(JSON.stringify(this.options, null, 2))
   Raven.init(this.options);
 
 
@@ -72,9 +78,9 @@ let Sentry = winston.transports.Sentry = function (options) {
 
 
     if (this.options.tags) {
-      for (let prop in this.options.tags) {
-        scope.setTags(prop, this.options.tags[prop]);
-      }
+
+      scope.setTags(this.options.tags);
+
       delete this.options.tags
     }
 

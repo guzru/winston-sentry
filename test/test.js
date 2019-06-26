@@ -3,7 +3,20 @@ const winston = require('winston')
 const WinstonSentry = require('../sentry-transport')
 
 const Sentry = new WinstonSentry({
-    dsn: process.env.DSN
+    dsn: process.env.DSN,
+    tags: {
+        baz: 'bar',
+        ham: 'eggs',
+        hoge: 'piyo'
+    },
+    extra: {
+        user: {
+            id: 'xyz'
+        }
+    },
+    context: {
+        toto: 'tata'
+    }
 })
 
 const logger = winston.createLogger({
