@@ -79,7 +79,10 @@ Sentry.prototype.log = function (oldLevel, msg, meta, callback) {
   }
 
   try {
+
+
     if (level == 'error') {
+
       // Support exceptions logging
       if (meta instanceof Error) {
         if (msg == '') {
@@ -88,9 +91,14 @@ Sentry.prototype.log = function (oldLevel, msg, meta, callback) {
           meta.message = msg + ". cause: " + meta.message;
           msg = meta;
         }
+      } else {
+        if (!(msg instanceof Error)) {
+          msg = new Error(msg)
+        }
       }
 
-      Raven.configureScope(scope => {
+      Raven.withScope(scope => {
+
         if (extra.extra) {
           for (let prop in extra.extra) {
             scope.setExtra(prop, extra.extra[prop]);
@@ -99,10 +107,11 @@ Sentry.prototype.log = function (oldLevel, msg, meta, callback) {
         }
 
         if (extra.tags) {
-          const tagKeys = extra.tags.keys()
-          tagKeys.forEach((k) => {
-            scope.setTag(k, extra.tags[k]);
-          })
+
+          for (let prop in extra.tags) {
+            scope.setTag(prop, extra.tags[prop]);
+          }
+
           delete extra.tags
 
         }
@@ -123,20 +132,22 @@ Sentry.prototype.log = function (oldLevel, msg, meta, callback) {
           scope.setFingerprint([method, path]);
         }
 
-        Raven.captureException(new Error(msg), function (err, res) {
+        Raven.captureException(msg, function (err, res) {
           if (err) {
             onError(err)
           }
           callback(null, true);
+
         });
-        scope.clear();
+
 
       });
 
 
     } else {
 
-      Raven.configureScope(scope => {
+      Raven.withScope(scope => {
+
         if (extra.extra) {
           for (let prop in extra.extra) {
             scope.setExtra(prop, extra.extra[prop]);
@@ -145,10 +156,11 @@ Sentry.prototype.log = function (oldLevel, msg, meta, callback) {
         }
 
         if (extra.tags) {
-          const tagKeys = extra.tags.keys()
-          tagKeys.forEach((k) => {
-            scope.setTag(k, extra.tags[k]);
-          })
+
+          for (let prop in extra.tags) {
+            scope.setTag(prop, extra.tags[prop]);
+          }
+
           delete extra.tags
 
         }
@@ -160,7 +172,6 @@ Sentry.prototype.log = function (oldLevel, msg, meta, callback) {
 
         if (extra.level) {
           scope.setLevel(extra.level);
-
         }
 
         Raven.captureMessage(msg, function (err, res) {
@@ -170,7 +181,6 @@ Sentry.prototype.log = function (oldLevel, msg, meta, callback) {
 
           callback(null, true);
         });
-        scope.clear();
 
       });
     }

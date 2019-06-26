@@ -7,7 +7,7 @@ const Sentry = new WinstonSentry({
 })
 
 const logger = winston.createLogger({
-    level: 'silly',
+    level: 'debug',
     format: winston.format.json(),
     defaultMeta: { service: 'test-service' },
     transports: [
@@ -22,10 +22,48 @@ describe('Create an error exception and send it to Sentry', function () {
 
 })
 
-describe('Create an error exception with user data and send it to Sentry', function () {
+describe('Create an error exception with extra data and send it to Sentry', function () {
 
     logger.error('test error from user foo ', { user: { id: 'foo' } })
     logger.error('test error from user bar ', { user: { id: 'bar' } })
+
+    logger.error('test error from user email ', { user: { email: 'foo@bar.baz', id: 1234 }, tags: { 'foo': 'bar' } })
+
+    logger.error('test error with request fingerprint', {
+        user: {
+            id: 1
+        },
+        request: {
+            path: '/foo/bar',
+            method: 'GET'
+        }
+    })
+
+    logger.error('test error with same request  fingerprint ', {
+        user: {
+            id: 2
+        },
+        request: {
+            path: '/foo/bar',
+            method: 'GET'
+        }
+    })
+
+    logger.error('test error with same request  fingerprint and extra data ', {
+        user: {
+            id: 2
+        },
+        request: {
+            path: '/foo/bar',
+            method: 'GET'
+        },
+        tags: {
+            foo: 'bar'
+        },
+        overwatch: {
+            best: 'game'
+        }
+    })
 
 
 })
@@ -42,6 +80,11 @@ describe('Create a warning message and send it to Sentry', function () {
 
 describe('Create a debug message and send it to Sentry', function () {
     logger.debug('this is a debug message')
+
+})
+
+describe('Create an info message and send it to Sentry', function () {
+    logger.info('this is an info message')
 
 })
 
