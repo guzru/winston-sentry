@@ -59,7 +59,6 @@ let Sentry = winston.transports.Sentry = function (options) {
   this.options = _.defaultsDeep(options, this.defaults);
 
 
-  console.log(JSON.stringify(this.options, null, 2))
   Raven.init(this.options);
 
 
