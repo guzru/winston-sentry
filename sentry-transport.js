@@ -2,7 +2,7 @@ let util = require('util'),
   winston = require('winston'),
   _ = require('lodash');
 
-const Raven = require('@sentry/node');
+const Sentry = require('@sentry/node');
 
 let onError = function (error) {
   var message = "Cannot talk to sentry.";
@@ -12,7 +12,7 @@ let onError = function (error) {
   console.log(message);
 }
 
-let Sentry = winston.transports.Sentry = function (options) {
+let SentryTransport = winston.transports.Sentry = function (options) {
   winston.Transport.call(this, _.pick(options, "level"));
 
   // Default options
@@ -59,10 +59,10 @@ let Sentry = winston.transports.Sentry = function (options) {
   this.options = _.defaultsDeep(options, this.defaults);
 
 
-  Raven.init(this.options);
+  Sentry.init(this.options);
 
 
-  Raven.configureScope((scope) => {
+  Sentry.configureScope((scope) => {
 
     if (this.options.context) {
       scope.setContext(this.options.context)
@@ -94,15 +94,15 @@ let Sentry = winston.transports.Sentry = function (options) {
 // Inherit from `winston.Transport` so you can take advantage
 // of the base functionality and `.handleExceptions()`.
 //
-util.inherits(Sentry, winston.Transport);
+util.inherits(SentryTransport, winston.Transport);
 
 //
 // Expose the name of this Transport on the prototype
-Sentry.prototype.name = 'sentry';
+SentryTransport.prototype.name = 'sentry';
 //
 
 
-Sentry.prototype.log = function (oldLevel, msg, meta, callback) {
+SentryTransport.prototype.log = function (oldLevel, msg, meta, callback) {
   const level = this.options.levelsMap[oldLevel];
 
   meta = meta || {};
@@ -146,7 +146,7 @@ Sentry.prototype.log = function (oldLevel, msg, meta, callback) {
         }
       }
 
-      Raven.withScope(scope => {
+      Sentry.withScope(scope => {
 
         if (extra.extra) {
           for (let prop in extra.extra) {
@@ -181,7 +181,7 @@ Sentry.prototype.log = function (oldLevel, msg, meta, callback) {
           scope.setFingerprint([method, path]);
         }
 
-        Raven.captureException(msg, function (err, res) {
+        Sentry.captureException(msg, function (err, res) {
           if (err) {
             onError(err)
           }
@@ -195,7 +195,7 @@ Sentry.prototype.log = function (oldLevel, msg, meta, callback) {
 
     } else {
 
-      Raven.withScope(scope => {
+      Sentry.withScope(scope => {
 
         if (extra.extra) {
           for (let prop in extra.extra) {
@@ -223,7 +223,7 @@ Sentry.prototype.log = function (oldLevel, msg, meta, callback) {
           scope.setLevel(extra.level);
         }
 
-        Raven.captureMessage(msg, function (err, res) {
+        Sentry.captureMessage(msg, function (err, res) {
           if (err) {
             onError(err)
           }
@@ -240,4 +240,4 @@ Sentry.prototype.log = function (oldLevel, msg, meta, callback) {
   }
 };
 
-module.exports = Sentry;
+module.exports = SentryTransport;
