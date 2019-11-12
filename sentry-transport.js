@@ -1,15 +1,23 @@
-var util = require('util'),
-    Raven = require('raven'),
-    winston = require('winston'),
-    _ = require('lodash');
+let util = require('util'),
+  winston = require('winston'),
+  _ = require('lodash');
 
-var Sentry = winston.transports.Sentry = function (options) {
+const Sentry = require('@sentry/node');
+
+let onError = function (error) {
+  var message = "Cannot talk to sentry.";
+  if (error && error.reason) {
+    message += " Reason: " + error.reason;
+  }
+  console.log(message);
+}
+
+let SentryTransport = winston.transports.Sentry = function (options) {
   winston.Transport.call(this, _.pick(options, "level"));
 
   // Default options
   this.defaults = {
     dsn: '',
-    patchGlobal: false,
     logger: 'root',
     levelsMap: {
       silly: 'debug',
@@ -19,51 +27,91 @@ var Sentry = winston.transports.Sentry = function (options) {
       warn: 'warning',
       error: 'error'
     },
+    environment: process.env.NODE_ENV,
     tags: {},
+    context: {},
+    user: {},
     extra: {}
   }
 
   // For backward compatibility with deprecated `globalTags` option
   options.tags = options.tags || options.globalTags;
 
-  this.options = _.defaultsDeep(options, this.defaults);
+  if (options.extra) {
+    options.user = options.user || options.extra.user
+    if (options.extra.user) {
+      delete options.extra.user
+    }
 
-  Raven.config(this.options.dsn, this.options);
+    options.context = options.context || options.extra.context
 
-  if (this.options.patchGlobal) {
-    Raven.install();
+    if (options.extra.context) {
+      delete options.extra.context
+    }
+
   }
 
-  // Handle errors
-  Raven.on('error', function(error) {
-    var message = "Cannot talk to sentry.";
-    if (error && error.reason) {
-        message += " Reason: " + error.reason;
+
+
+
+
+
+  this.options = _.defaultsDeep(options, this.defaults);
+
+
+  Sentry.init(this.options);
+
+
+  Sentry.configureScope((scope) => {
+
+    if (this.options.context) {
+      scope.setContext(this.options.context)
     }
-    console.log(message);
-  });
+
+    if (this.options.extra) {
+      for (let prop in this.options.extra) {
+        scope.setExtra(prop, this.options.extra[prop]);
+      }
+      delete this.options.extra
+    }
+
+
+    if (this.options.tags) {
+
+      scope.setTags(this.options.tags);
+
+      delete this.options.tags
+    }
+
+    if (this.options.user) {
+      scope.setUser(this.options.user)
+    }
+  })
+
 };
 
 //
 // Inherit from `winston.Transport` so you can take advantage
 // of the base functionality and `.handleExceptions()`.
 //
-util.inherits(Sentry, winston.Transport);
+util.inherits(SentryTransport, winston.Transport);
 
 //
 // Expose the name of this Transport on the prototype
-Sentry.prototype.name = 'sentry';
+SentryTransport.prototype.name = 'sentry';
 //
 
-Sentry.prototype.log = function (level, msg, meta, callback) {
-  level = this.options.levelsMap[level];
+
+SentryTransport.prototype.log = function (oldLevel, msg, meta, callback) {
+  const level = this.options.levelsMap[oldLevel];
+
   meta = meta || {};
 
-  var extraData = _.extend({}, meta),
-      tags = extraData.tags;
+  let extraData = _.extend({}, meta),
+    tags = extraData.tags;
   delete extraData.tags;
 
-  var extra = {
+  let extra = {
     'level': level,
     'extra': extraData,
     'tags': tags
@@ -80,7 +128,10 @@ Sentry.prototype.log = function (level, msg, meta, callback) {
   }
 
   try {
+
+
     if (level == 'error') {
+
       // Support exceptions logging
       if (meta instanceof Error) {
         if (msg == '') {
@@ -89,19 +140,104 @@ Sentry.prototype.log = function (level, msg, meta, callback) {
           meta.message = msg + ". cause: " + meta.message;
           msg = meta;
         }
+      } else {
+        if (!(msg instanceof Error)) {
+          msg = new Error(msg)
+        }
       }
 
-      Raven.captureException(msg, extra, function() {
-        callback(null, true);
+      Sentry.withScope(scope => {
+
+        if (extra.extra) {
+          for (let prop in extra.extra) {
+            scope.setExtra(prop, extra.extra[prop]);
+          }
+          delete extra.extra
+        }
+
+        if (extra.tags) {
+
+          for (let prop in extra.tags) {
+            scope.setTag(prop, extra.tags[prop]);
+          }
+
+          delete extra.tags
+
+        }
+
+        if (extra.user) {
+          scope.setUser(extra.user);
+          delete extra.user
+        }
+
+        if (extra.level) {
+          scope.setLevel(extra.level);
+        }
+
+        if (extra.request) {
+          const httpRequest = extra.request
+          const method = httpRequest.method
+          const path = httpRequest.path
+          scope.setFingerprint([method, path]);
+        }
+
+        Sentry.captureException(msg, function (err, res) {
+          if (err) {
+            onError(err)
+          }
+          callback(null, true);
+
+        });
+
+
       });
+
+
     } else {
-      Raven.captureMessage(msg, extra, function() {
-        callback(null, true);
+
+      Sentry.withScope(scope => {
+
+        if (extra.extra) {
+          for (let prop in extra.extra) {
+            scope.setExtra(prop, extra.extra[prop]);
+          }
+          delete extra.extra
+        }
+
+        if (extra.tags) {
+
+          for (let prop in extra.tags) {
+            scope.setTag(prop, extra.tags[prop]);
+          }
+
+          delete extra.tags
+
+        }
+
+        if (extra.user) {
+          scope.setUser(extra.user);
+          delete extra.user
+        }
+
+        if (extra.level) {
+          scope.setLevel(extra.level);
+        }
+
+        Sentry.captureMessage(msg, function (err, res) {
+          if (err) {
+            onError(err)
+          }
+
+          callback(null, true);
+        });
+
       });
     }
-  } catch(err) {
+
+
+  } catch (err) {
     console.error(err);
   }
 };
 
-module.exports = Sentry;
+module.exports = SentryTransport;
