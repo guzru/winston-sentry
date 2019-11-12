@@ -9,7 +9,7 @@ Follow this sample configuration to use:
 ```javascript
 var winston = require('winston'),
     Mail = require('winston-mail').Mail,
-    Sentry = require('winston-sentry');
+    Sentry = require('@mgara/winston-sentry');
 
 var logger = new winston.Logger({
     transports: [
